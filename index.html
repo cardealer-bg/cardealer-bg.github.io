@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#063a52">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>CAR DEALER · liste za štampu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
@@ -48,12 +52,13 @@ footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:cente
 <body>
 <header class="band"><div class="in">
   <img src="logo.png" alt="CAR DEALER">
-  <div><h1>Liste za štampu</h1><p>43 automobila u ponudi · ažurirano 21.10.2026. 14:27</p></div>
+  <div><h1>Liste za štampu</h1><p>43 automobila u ponudi · ažurirano 21.10.2026. 14:44</p></div>
 </div></header>
 <main class="in">
   <div class="tools">
     <input id="q" type="search" placeholder="Pretraga: marka, model, godište ili broj oglasa" aria-label="Pretraga" autocomplete="off">
     <a class="btn primary" href="pdf/CAR_DEALER_sve_liste_A4.pdf" target="_blank" rel="noopener">Sve liste (jedan PDF)</a>
+    <button class="btn ghost" id="install" type="button" hidden>Instaliraj na računar</button>
   </div>
   <p class="meta">Klik na <b>Štampaj</b> otvara A4 listu u novoj kartici. Tamo pritisnite ikonicu štampača ili Ctrl+P (na telefonu: Podeli → Štampaj).</p>
   <div class="grid" id="grid"></div>
@@ -102,6 +107,12 @@ var CHANGES=[];
       box.appendChild(row);
     });
   }
+  // offline + install as a Windows app
+  if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(function(){}); }
+  var deferred=null, ib=document.getElementById("install");
+  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;ib.hidden=false});
+  ib.addEventListener("click",function(){ if(!deferred) return; deferred.prompt(); deferred.userChoice.finally(function(){deferred=null;ib.hidden=true}); });
+  window.addEventListener("appinstalled",function(){ib.hidden=true});
 })();
 </script>
 </body>
