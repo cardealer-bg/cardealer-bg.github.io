@@ -69,14 +69,14 @@ footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:cente
 <body>
 <header class="band"><div class="in">
   <img src="logo.png" alt="CAR DEALER">
-  <div><h1>Liste za štampu</h1><p>44 automobila u ponudi · ažurirano 26.10.2026. 12:46</p></div>
+  <div><h1>Liste za štampu</h1><p>44 automobila u ponudi · ažurirano 26.10.2026. 12:49</p></div>
 </div></header>
 <main class="in">
   <section class="stats" aria-label="Pregled">
     <div class="stat"><b id="s-cars">0</b><span>vozila u ponudi</span></div>
     <div class="stat"><b id="s-pdf">0</b><span>A4 listova spremno za štampu</span></div>
     <div class="stat"><b id="s-chg">0</b><span>novih i izmenjenih (7 dana)</span></div>
-    <div class="stat ok"><b>26.10.2026. 12:46</b><span>poslednja provera oglasa</span></div>
+    <div class="stat ok"><b>26.10.2026. 12:49</b><span>poslednja provera oglasa</span></div>
   </section>
   <div class="tools">
     <input id="q" type="search" placeholder="Pretraga: marka, model, godište ili broj oglasa" aria-label="Pretraga" autocomplete="off">
@@ -134,7 +134,7 @@ var CHANGES=[{"at": "2026-10-26T11:46:23Z", "id": "30625764", "car": "Chery Tigg
       top.append(left,el("div","p",c.price));
       var s=el("div","s",[c.year,c.km,c.fuel,c.gear].filter(Boolean).join(" · ")+" · #"+c.id);
       var acts=el("div","acts");
-      var pr=el("a","btn primary","Štampaj"); pr.href=c.pdf; pr.target="_blank"; pr.rel="noopener";
+      var pr=el("a","btn primary","Štampaj"); pr.href=c.pdf+"?v="+encodeURIComponent(lastChange(c)); pr.target="_blank"; pr.rel="noopener";
       acts.appendChild(pr);
       if(c.url){var ad=el("a","btn ghost","Oglas"); ad.href=c.url; ad.target="_blank"; ad.rel="noopener"; acts.appendChild(ad)}
       card.append(top,s,acts);
@@ -165,6 +165,8 @@ var CHANGES=[{"at": "2026-10-26T11:46:23Z", "id": "30625764", "car": "Chery Tigg
     document.getElementById("s-chg").textContent=fresh;
     document.getElementById("t-new").textContent="("+fresh+")";
   }
+  var allA=document.querySelector('a[href="pdf/CAR_DEALER_sve_liste_A4.pdf"]');
+  if(allA) allA.href+="?v="+encodeURIComponent(CARS.map(lastChange).sort().pop()||"");
   stats();
   render("");
   changesList();
