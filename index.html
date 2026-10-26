@@ -57,27 +57,33 @@ h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .tabs{display:flex;gap:6px;margin:0 0 12px}
 .tab{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:20px;padding:7px 14px;cursor:pointer;min-height:38px}
 .tab[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.prt{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;min-height:36px;border-top:1px solid var(--line);padding-top:8px;margin-top:2px}
+.prt input{width:20px;height:20px;margin:0;accent-color:#1f9d6b;cursor:pointer}
+.prt.on{color:#145c3f}
+.b-ok{background:#d6f0e4;color:#145c3f}
+.chg div.done{color:var(--muted)}
+.chg div.done::after{content:" ✓ odštampano";color:#1f9d6b;font-weight:600}
 footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:center}
 </style>
 </head>
 <body>
 <header class="band"><div class="in">
   <img src="logo.png" alt="CAR DEALER">
-  <div><h1>Liste za štampu</h1><p>44 automobila u ponudi · ažurirano 26.10.2026. 12:33</p></div>
+  <div><h1>Liste za štampu</h1><p>44 automobila u ponudi · ažurirano 26.10.2026. 12:39</p></div>
 </div></header>
 <main class="in">
   <section class="stats" aria-label="Pregled">
     <div class="stat"><b id="s-cars">0</b><span>vozila u ponudi</span></div>
     <div class="stat"><b id="s-pdf">0</b><span>A4 listova spremno za štampu</span></div>
     <div class="stat"><b id="s-chg">0</b><span>novih i izmenjenih (7 dana)</span></div>
-    <div class="stat ok"><b>26.10.2026. 12:33</b><span>poslednja provera oglasa</span></div>
+    <div class="stat ok"><b>26.10.2026. 12:39</b><span>poslednja provera oglasa</span></div>
   </section>
   <div class="tools">
     <input id="q" type="search" placeholder="Pretraga: marka, model, godište ili broj oglasa" aria-label="Pretraga" autocomplete="off">
     <a class="btn primary" href="pdf/CAR_DEALER_sve_liste_A4.pdf" target="_blank" rel="noopener">Sve liste (jedan PDF)</a>
     <button class="btn ghost" id="install" type="button" hidden>Instaliraj na računar</button>
   </div>
-  <p class="meta">Klik na <b>Štampaj</b> otvara A4 listu u novoj kartici. Tamo pritisnite ikonicu štampača ili Ctrl+P (na telefonu: Podeli → Štampaj).</p>
+  <p class="meta">Klik na <b>Štampaj</b> otvara A4 listu u novoj kartici. Tamo pritisnite ikonicu štampača ili Ctrl+P (na telefonu: Podeli → Štampaj). Kad listu stavite u auto, štiklirajte <b>Odštampano</b> – auto nestaje iz „Novo i izmenjeno“ dok ne stigne nova izmena.</p>
   <div class="tabs" role="group" aria-label="Filter">
     <button class="tab" type="button" data-f="all" aria-pressed="true">Sva vozila</button>
     <button class="tab" type="button" data-f="new" aria-pressed="false">Novo i izmenjeno <span id="t-new"></span></button>
@@ -95,7 +101,18 @@ var CHANGES=[{"at": "2026-10-26T10:51:38Z", "id": "30031316", "car": "Volkswagen
   var recent=function(iso,days){return iso&&(Date.now()-Date.parse(iso))<days*864e5};
   function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
   var filter="all", query="";
-  function isFresh(c){return !c.sold&&(recent(c.added,7)||recent(c.changed,7))}
+  // "Odštampano": per computer (localStorage). Saved time of printing per car id;
+  // a car counts as printed until it gets a newer change (added/changed after that time).
+  var KEY="cd-odstampano";
+  var PRESET={"29781603":"2026-10-22T23:59:00Z","30389207":"2026-10-22T23:59:00Z","30219975":"2026-10-22T23:59:00Z","30606949":"2026-10-22T23:59:00Z"};
+  var P=null;
+  try{var raw=localStorage.getItem(KEY); P=raw?JSON.parse(raw):null}catch(e){}
+  if(!P||typeof P!=="object"){P=JSON.parse(JSON.stringify(PRESET)); save()}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}}
+  function lastChange(c){return [c.added||"",c.changed||""].sort().pop()}
+  function isPrinted(c){var t=P[c.id];return !!t&&Date.parse(t)>=Date.parse(lastChange(c)||0)}
+  function isFresh(c){return !c.sold&&(recent(c.added,7)||recent(c.changed,7))&&!isPrinted(c)}
+  var BYID={}; CARS.forEach(function(c){BYID[c.id]=c});
   function render(q){
     if(q!=null) query=q; q=query;
     var g=document.getElementById("grid"); g.textContent="";
@@ -106,9 +123,13 @@ var CHANGES=[{"at": "2026-10-26T10:51:38Z", "id": "30031316", "car": "Volkswagen
       var card=el("article","car"+(c.sold?" sold":""));
       var top=el("div","top"), left=el("div");
       var t=el("div","t",c.make+" "+c.model);
+      var printed=!c.sold&&isPrinted(c);
       if(c.sold) t.appendChild(el("span","badge b-sold","PRODATO"));
-      else if(recent(c.added,3)) t.appendChild(el("span","badge b-new","NOVO"));
-      if(!c.sold&&recent(c.changed,7)) t.appendChild(el("span","badge b-chg","IZMENA"));
+      else if(printed&&(recent(c.added,7)||recent(c.changed,7))) t.appendChild(el("span","badge b-ok","ODŠTAMPANO"));
+      else if(!printed){
+        if(recent(c.added,3)) t.appendChild(el("span","badge b-new","NOVO"));
+        if(recent(c.changed,7)) t.appendChild(el("span","badge b-chg","IZMENA"));
+      }
       left.append(t,el("div","v",c.variant));
       top.append(left,el("div","p",c.price));
       var s=el("div","s",[c.year,c.km,c.fuel,c.gear].filter(Boolean).join(" · ")+" · #"+c.id);
@@ -116,25 +137,44 @@ var CHANGES=[{"at": "2026-10-26T10:51:38Z", "id": "30031316", "car": "Volkswagen
       var pr=el("a","btn primary","Štampaj"); pr.href=c.pdf; pr.target="_blank"; pr.rel="noopener";
       acts.appendChild(pr);
       if(c.url){var ad=el("a","btn ghost","Oglas"); ad.href=c.url; ad.target="_blank"; ad.rel="noopener"; acts.appendChild(ad)}
-      card.append(top,s,acts); g.appendChild(card);
+      card.append(top,s,acts);
+      if(!c.sold){
+        var lab=el("label","prt"+(printed?" on":"")), cb=document.createElement("input");
+        cb.type="checkbox"; cb.checked=printed;
+        cb.addEventListener("change",function(){
+          if(cb.checked) P[c.id]=new Date().toISOString(); else delete P[c.id];
+          save(); refresh();
+        });
+        lab.append(cb,document.createTextNode("Odštampano"));
+        card.appendChild(lab);
+      }
+      g.appendChild(card);
     });
   }
+  function refresh(){ stats(); render(); changesList(); }
   document.getElementById("q").addEventListener("input",function(e){render(e.target.value.trim().toLowerCase())});
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.addEventListener("click",function(){
     filter=b.getAttribute("data-f");
     Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-pressed",String(x===b))});
     render();
   })});
-  var active=CARS.filter(function(c){return !c.sold}), fresh=CARS.filter(isFresh).length;
-  document.getElementById("s-cars").textContent=active.length;
-  document.getElementById("s-pdf").textContent=active.filter(function(c){return c.pdf}).length;
-  document.getElementById("s-chg").textContent=fresh;
-  document.getElementById("t-new").textContent="("+fresh+")";
+  function stats(){
+    var active=CARS.filter(function(c){return !c.sold}), fresh=CARS.filter(isFresh).length;
+    document.getElementById("s-cars").textContent=active.length;
+    document.getElementById("s-pdf").textContent=active.filter(function(c){return c.pdf}).length;
+    document.getElementById("s-chg").textContent=fresh;
+    document.getElementById("t-new").textContent="("+fresh+")";
+  }
+  stats();
   render("");
-  if(CHANGES.length){
+  changesList();
+  function changesList(){
+    if(!CHANGES.length) return;
     var box=document.getElementById("chg"); box.textContent="";
     CHANGES.forEach(function(ch){
-      var d=new Date(ch.at), row=el("div");
+      var d=new Date(ch.at), car=BYID[ch.id];
+      var done=car&&!car.sold&&P[ch.id]&&Date.parse(P[ch.id])>=Date.parse(ch.at)&&ch.type!=="uklonjen";
+      var row=el("div",done?"done":null);
       row.appendChild(el("time",null,isNaN(d)?"":("0"+d.getDate()).slice(-2)+"."+("0"+(d.getMonth()+1)).slice(-2)+"."));
       var det=(ch.details||[]).map(function(x){return x.field+": "+(x.old||"—")+" → "+(x.new||"—")}).join(" · ");
       row.appendChild(document.createTextNode((ch.car||"#"+ch.id)+" — "+(TYPE[ch.type]||ch.type)+(det?": "+det:"")));
