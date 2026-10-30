@@ -1,0 +1,83 @@
+name: Ažuriraj liste
+
+on:
+  workflow_dispatch:             # dugme "Run workflow" (Goran, bilo kada)
+    inputs:
+      proba:
+        description: "Samo proba (ništa se ne objavljuje)"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "20 6 * * *"         # 07:20 / 08:20 po beogradskom vremenu
+    - cron: "20 15 * * *"        # 16:20 / 17:20 po beogradskom vremenu
+
+permissions:
+  contents: write
+
+concurrency:
+  group: azuriranje
+  cancel-in-progress: false
+
+jobs:
+  azuriraj:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Instalacija alata
+        run: |
+          pip install playwright==1.47.0 pypdf==5.0.1
+          python -m playwright install --with-deps chromium
+          sudo apt-get install -y fonts-dejavu-core fonts-liberation >/dev/null
+          npm install --prefix /tmp/qr qrcode-terminal@0.12.0
+
+      - name: Čitanje oglasa sa Polovnih automobila
+        id: scrape
+        run: |
+          set +e
+          python tools/scrape.py /tmp/rad
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ $code -ne 0 ]; then
+            echo "### Polovni automobili nisu mogli da se učitaju. Ništa nije menjano." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Poređenje, PDF liste i sajt
+        env:
+          QR_LIB: /tmp/qr/node_modules/qrcode-terminal/vendor/QRCode
+        run: |
+          set +e
+          python tools/update.py /tmp/rad
+          code=$?
+          cat /tmp/rad/report.md >> "$GITHUB_STEP_SUMMARY"
+          exit $code
+
+      - name: Objavljivanje
+        if: ${{ !inputs.proba }}
+        run: |
+          git config user.name "CAR DEALER liste"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A index.html data pdf logo.png manifest.webmanifest sw.js icon-192.png icon-512.png favicon.ico
+          git commit -m "Provera oglasa $(TZ=Europe/Belgrade date +%d.%m.%Y.\ %H:%M) (GitHub)" || exit 0
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && break
+            sleep 10
+          done
+
+      - name: Radni fajlovi (za proveru)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad
+          path: /tmp/rad
+          retention-days: 7

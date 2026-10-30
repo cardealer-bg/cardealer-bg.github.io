@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#063a52">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>CAR DEALER · liste za štampu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#eef3f6;--surface:#fff;--fg:#10232d;--muted:#5b6c75;--line:#d3dee4;--navy:#063a52;--accent:#0b6f8f;--mint:#56d6e0;--card:#f6fafc;--card-line:#d3e2ea;--warn:#f2c14e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Poppins,"Segoe UI",Arial,sans-serif;font-size:15px}
+.band{background:var(--navy);color:#fff}
+.in{max-width:1180px;margin:0 auto;padding:16px}
+.band .in{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.band img{height:56px}
+.band h1{margin:0;font-size:22px}
+.band p{margin:2px 0 0;color:#b9d3dd;font-size:13px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0 6px}
+.tools input{flex:1;min-width:220px;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:600;text-decoration:none;border-radius:10px;padding:11px 16px;min-height:44px;border:1px solid var(--accent);cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{background:#fff;color:var(--accent)}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+.meta{font-size:12.5px;color:var(--muted);margin:4px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.car{background:var(--surface);border:1px solid var(--card-line);border-radius:12px;padding:14px 14px 12px 16px;box-shadow:inset 4px 0 0 #9fc6d6;display:flex;flex-direction:column;gap:8px}
+.car.sold{opacity:.55}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.t{font-weight:700;font-size:16px;line-height:1.25}
+.v{font-size:12.5px;color:var(--muted)}
+.p{font-weight:700;color:var(--accent);white-space:nowrap;font-size:17px}
+.s{font-size:12.5px;color:var(--muted)}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:2px}
+.b-new{background:var(--mint);color:#063a52}.b-chg{background:var(--warn);color:#3a2a00}.b-sold{background:var(--line);color:var(--muted)}
+.acts{display:flex;gap:8px;margin-top:2px}
+.acts .btn{flex:1;padding:9px 10px;font-size:14px}
+h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:30px 0 10px}
+.chg{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 14px}
+.chg div{padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.chg div:last-child{border-bottom:0}
+.chg time{color:var(--muted);margin-right:8px;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);padding:20px 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:18px}
+.stat{padding:14px 18px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0}
+.stat b{display:block;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+.stat.ok b{font-size:15px;padding-top:6px}
+.stat.ok b::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:#1f9d6b;margin-right:7px;vertical-align:1px}
+@media (max-width:720px){.stats{grid-template-columns:1fr 1fr}.stat:nth-child(3){border-left:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}}
+.tabs{display:flex;gap:6px;margin:0 0 12px}
+.tab{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:20px;padding:7px 14px;cursor:pointer;min-height:38px}
+.tab[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.prt{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;min-height:36px;border-top:1px solid var(--line);padding-top:8px;margin-top:2px}
+.prt input{width:20px;height:20px;margin:0;accent-color:#1f9d6b;cursor:pointer}
+.prt.on{color:#145c3f}
+.b-ok{background:#d6f0e4;color:#145c3f}
+.chg div.done{color:var(--muted)}
+.chg div.done::after{content:" ✓ odštampano";color:#1f9d6b;font-weight:600}
+footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:center}
+</style>
+</head>
+<body>
+<header class="band"><div class="in">
+  <img src="logo.png" alt="CAR DEALER">
+  <div><h1>Liste za štampu</h1><p>{{COUNT}} automobila u ponudi · ažurirano {{UPDATED}}</p></div>
+</div></header>
+<main class="in">
+  <section class="stats" aria-label="Pregled">
+    <div class="stat"><b id="s-cars">0</b><span>vozila u ponudi</span></div>
+    <div class="stat"><b id="s-pdf">0</b><span>A4 listova spremno za štampu</span></div>
+    <div class="stat"><b id="s-chg">0</b><span>novih i izmenjenih (7 dana)</span></div>
+    <div class="stat ok"><b>{{UPDATED}}</b><span>poslednja provera oglasa</span></div>
+  </section>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Pretraga: marka, model, godište ili broj oglasa" aria-label="Pretraga" autocomplete="off">
+    <a class="btn primary" href="pdf/CAR_DEALER_sve_liste_A4.pdf" target="_blank" rel="noopener">Sve liste (jedan PDF)</a>
+    <button class="btn ghost" id="install" type="button" hidden>Instaliraj na računar</button>
+  </div>
+  <p class="meta">Klik na <b>Štampaj</b> otvara A4 listu u novoj kartici. Tamo pritisnite ikonicu štampača ili Ctrl+P (na telefonu: Podeli → Štampaj). Kad listu stavite u auto, štiklirajte <b>Odštampano</b> – auto nestaje iz „Novo i izmenjeno“ dok ne stigne nova izmena.</p>
+  <div class="tabs" role="group" aria-label="Filter">
+    <button class="tab" type="button" data-f="all" aria-pressed="true">Sva vozila</button>
+    <button class="tab" type="button" data-f="new" aria-pressed="false">Novo i izmenjeno <span id="t-new"></span></button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <h2>Izmene u oglasima</h2>
+  <div class="chg" id="chg"><div class="empty">Izmene se beleže pri svakodnevnoj proveri oglasa.</div></div>
+</main>
+<footer>CAR DEALER · Beograd, Marka Čelebonovića 18 · Don't dream it, drive it</footer>
+<script>
+var CARS=/*CARS*/[];
+var CHANGES=/*CHANGES*/[];
+(function(){
+  var TYPE={nov:"Nov oglas",cena:"Promena cene",izmena:"Izmena podataka",uklonjen:"Oglas uklonjen",vracen:"Oglas ponovo aktivan"};
+  var recent=function(iso,days){return iso&&(Date.now()-Date.parse(iso))<days*864e5};
+  function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+  var filter="all", query="";
+  // "Odštampano": per computer (localStorage). Saved time of printing per car id;
+  // a car counts as printed until it gets a newer change (added/changed after that time).
+  var KEY="cd-odstampano";
+  var PRESET={"29781603":"2026-10-22T23:59:00Z","30389207":"2026-10-22T23:59:00Z","30219975":"2026-10-22T23:59:00Z","30606949":"2026-10-22T23:59:00Z"};
+  var P=null;
+  try{var raw=localStorage.getItem(KEY); P=raw?JSON.parse(raw):null}catch(e){}
+  if(!P||typeof P!=="object"){P=JSON.parse(JSON.stringify(PRESET)); save()}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}}
+  function lastChange(c){return [c.added||"",c.changed||""].sort().pop()}
+  function isPrinted(c){var t=P[c.id];return !!t&&Date.parse(t)>=Date.parse(lastChange(c)||0)}
+  function isFresh(c){return !c.sold&&(recent(c.added,7)||recent(c.changed,7))&&!isPrinted(c)}
+  var BYID={}; CARS.forEach(function(c){BYID[c.id]=c});
+  function render(q){
+    if(q!=null) query=q; q=query;
+    var g=document.getElementById("grid"); g.textContent="";
+    var list=CARS.filter(function(c){var h=(c.make+" "+c.model+" "+c.variant+" "+c.year+" "+c.id).toLowerCase();return (!q||h.indexOf(q)>=0)&&(filter==="all"||isFresh(c))});
+    list.sort(function(a,b){return (a.sold-b.sold)||(a.make+a.model).localeCompare(b.make+b.model)});
+    if(!list.length){g.appendChild(el("div","empty","Nema automobila za ovu pretragu."));return}
+    list.forEach(function(c){
+      var card=el("article","car"+(c.sold?" sold":""));
+      var top=el("div","top"), left=el("div");
+      var t=el("div","t",c.make+" "+c.model);
+      var printed=!c.sold&&isPrinted(c);
+      if(c.sold) t.appendChild(el("span","badge b-sold","PRODATO"));
+      else if(printed&&(recent(c.added,7)||recent(c.changed,7))) t.appendChild(el("span","badge b-ok","ODŠTAMPANO"));
+      else if(!printed){
+        if(recent(c.added,3)) t.appendChild(el("span","badge b-new","NOVO"));
+        if(recent(c.changed,7)) t.appendChild(el("span","badge b-chg","IZMENA"));
+      }
+      left.append(t,el("div","v",c.variant));
+      top.append(left,el("div","p",c.price));
+      var s=el("div","s",[c.year,c.km,c.fuel,c.gear].filter(Boolean).join(" · ")+" · #"+c.id);
+      var acts=el("div","acts");
+      var pr=el("a","btn primary","Štampaj"); pr.href=c.pdf+"?v="+encodeURIComponent(lastChange(c)); pr.target="_blank"; pr.rel="noopener";
+      acts.appendChild(pr);
+      if(c.url){var ad=el("a","btn ghost","Oglas"); ad.href=c.url; ad.target="_blank"; ad.rel="noopener"; acts.appendChild(ad)}
+      card.append(top,s,acts);
+      if(!c.sold){
+        var lab=el("label","prt"+(printed?" on":"")), cb=document.createElement("input");
+        cb.type="checkbox"; cb.checked=printed;
+        cb.addEventListener("change",function(){
+          if(cb.checked) P[c.id]=new Date().toISOString(); else delete P[c.id];
+          save(); refresh();
+        });
+        lab.append(cb,document.createTextNode("Odštampano"));
+        card.appendChild(lab);
+      }
+      g.appendChild(card);
+    });
+  }
+  function refresh(){ stats(); render(); changesList(); }
+  document.getElementById("q").addEventListener("input",function(e){render(e.target.value.trim().toLowerCase())});
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.addEventListener("click",function(){
+    filter=b.getAttribute("data-f");
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-pressed",String(x===b))});
+    render();
+  })});
+  function stats(){
+    var active=CARS.filter(function(c){return !c.sold}), fresh=CARS.filter(isFresh).length;
+    document.getElementById("s-cars").textContent=active.length;
+    document.getElementById("s-pdf").textContent=active.filter(function(c){return c.pdf}).length;
+    document.getElementById("s-chg").textContent=fresh;
+    document.getElementById("t-new").textContent="("+fresh+")";
+  }
+  var allA=document.querySelector('a[href="pdf/CAR_DEALER_sve_liste_A4.pdf"]');
+  if(allA) allA.href+="?v="+encodeURIComponent(CARS.map(lastChange).sort().pop()||"");
+  stats();
+  render("");
+  changesList();
+  function changesList(){
+    if(!CHANGES.length) return;
+    var box=document.getElementById("chg"); box.textContent="";
+    CHANGES.forEach(function(ch){
+      var d=new Date(ch.at), car=BYID[ch.id];
+      var done=car&&!car.sold&&P[ch.id]&&Date.parse(P[ch.id])>=Date.parse(ch.at)&&ch.type!=="uklonjen";
+      var row=el("div",done?"done":null);
+      row.appendChild(el("time",null,isNaN(d)?"":("0"+d.getDate()).slice(-2)+"."+("0"+(d.getMonth()+1)).slice(-2)+"."));
+      var det=(ch.details||[]).map(function(x){return x.field+": "+(x.old||"—")+" → "+(x.new||"—")}).join(" · ");
+      row.appendChild(document.createTextNode((ch.car||"#"+ch.id)+" — "+(TYPE[ch.type]||ch.type)+(det?": "+det:"")));
+      box.appendChild(row);
+    });
+  }
+  // offline + install as a Windows app
+  if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(function(){}); }
+  var deferred=null, ib=document.getElementById("install");
+  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;ib.hidden=false});
+  ib.addEventListener("click",function(){ if(!deferred) return; deferred.prompt(); deferred.userChoice.finally(function(){deferred=null;ib.hidden=true}); });
+  window.addEventListener("appinstalled",function(){ib.hidden=true});
+})();
+</script>
+</body>
+</html>
