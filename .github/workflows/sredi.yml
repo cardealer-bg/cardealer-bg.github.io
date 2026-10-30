@@ -1,0 +1,32 @@
+name: Sredi foldere (jednom)
+
+on:
+  workflow_dispatch:
+  push:
+    paths: [".github/workflows/sredi.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  sredi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Premesti fajlove u data/, tools/ i pdf/
+        run: |
+          mkdir -p data tools pdf
+          for f in cars.json changes.json meta.json; do [ -f "$f" ] && git mv -f "$f" data/; done
+          for f in build_car.py make_sheet.py make_site.py merge_all.py scrape.py update.py \
+                   sheet.js logo_data.js qr.js site_template.html logo_white.png \
+                   primer_raw.json primer_auta.json azuriranje.yml; do
+            [ -f "$f" ] && git mv -f "$f" tools/
+          done
+          for f in manifest.webmanifest sw.js icon-192.png icon-512.png favicon.ico; do
+            [ -f "$f" ] && cp "$f" tools/ && git add "tools/$f"
+          done
+          for f in *.pdf; do [ -f "$f" ] && git mv -f "$f" pdf/; done
+          git config user.name "CAR DEALER liste"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Sredjeni folderi data/, tools/, pdf/" || echo "Nema sta da se premesti"
+          git push origin HEAD:main
