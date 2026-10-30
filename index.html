@@ -63,6 +63,17 @@ h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .b-ok{background:#d6f0e4;color:#145c3f}
 .chg div.done{color:var(--muted)}
 .chg div.done::after{content:" ✓ odštampano";color:#1f9d6b;font-weight:600}
+.btn[disabled]{opacity:.6;cursor:wait}
+#refresh.busy svg{animation:spin 1.2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rs-ok{color:#145c3f!important}.rs-err{color:#a12a1f!important}
+dialog.key{border:0;border-radius:14px;padding:22px;max-width:520px;width:calc(100% - 32px);color:var(--fg);font:inherit}
+dialog.key::backdrop{background:rgba(6,58,82,.55)}
+dialog.key h3{margin:0 0 8px;font-size:18px}
+dialog.key ol{padding-left:20px;margin:8px 0 14px;font-size:13.5px;line-height:1.55}
+dialog.key input{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+dialog.key .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-size:12.5px;color:var(--accent);text-decoration:underline;cursor:pointer}
 footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:center}
 </style>
 </head>
@@ -82,9 +93,9 @@ footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:cente
     <input id="q" type="search" placeholder="Pretraga: marka, model, godište ili broj oglasa" aria-label="Pretraga" autocomplete="off">
     <a class="btn primary" href="pdf/CAR_DEALER_sve_liste_A4.pdf" target="_blank" rel="noopener">Sve liste (jedan PDF)</a>
     <button class="btn ghost" id="install" type="button" hidden>Instaliraj na računar</button>
-    <a class="btn ghost" id="refresh" href="https://github.com/cardealer-bg/cardealer-bg.github.io/actions/workflows/azuriranje.yml" target="_blank" rel="noopener" title="Otvara GitHub: kliknite „Run workflow“, pa zeleno „Run workflow“. Liste stižu za oko 10 minuta."><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>Ažuriraj liste</a>
+    <button class="btn ghost" id="refresh" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Ažuriraj liste</span></button>
   </div>
-  <p class="meta" id="refresh-help">Liste se same proveravaju svako jutro i popodne. Za proveru odmah: <b>Ažuriraj liste</b> → na GitHubu kliknite <b>Run workflow</b>, pa zeleno <b>Run workflow</b>. Za oko 10 minuta osvežite ovu stranu.</p>
+  <p class="meta" id="refresh-help" role="status" aria-live="polite">Liste se same proveravaju svako jutro i popodne. Za proveru odmah kliknite <b>Ažuriraj liste</b> – za oko 10 minuta strana se sama osveži.</p>
   <p class="meta">Klik na <b>Štampaj</b> otvara A4 listu u novoj kartici. Tamo pritisnite ikonicu štampača ili Ctrl+P (na telefonu: Podeli → Štampaj). Kad listu stavite u auto, štiklirajte <b>Odštampano</b> – auto nestaje iz „Novo i izmenjeno“ dok ne stigne nova izmena.</p>
   <div class="tabs" role="group" aria-label="Filter">
     <button class="tab" type="button" data-f="all" aria-pressed="true">Sva vozila</button>
@@ -191,6 +202,75 @@ var CHANGES=[{"at": "2026-10-30T10:51:33Z", "id": "27542643", "car": "Audi Q8 S-
   window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;ib.hidden=false});
   ib.addEventListener("click",function(){ if(!deferred) return; deferred.prompt(); deferred.userChoice.finally(function(){deferred=null;ib.hidden=true}); });
   window.addEventListener("appinstalled",function(){ib.hidden=true});
+})();
+</script>
+<dialog class="key" id="keydlg">
+  <form method="dialog">
+    <h3>Ključ za ažuriranje</h3>
+    <p class="s">Unosi se jednom na ovom računaru i ostaje sačuvan samo ovde.</p>
+    <ol>
+      <li>Otvorite <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → novi ključ</a> (prijavljeni na nalog sajta).</li>
+      <li><b>Token name</b>: Ažuriranje liste · <b>Expiration</b>: najduže moguće.</li>
+      <li><b>Repository access</b>: Only select repositories → <b>cardealer-bg.github.io</b>.</li>
+      <li><b>Permissions → Actions</b>: <b>Read and write</b>.</li>
+      <li><b>Generate token</b>, kopirajte ga i nalepite ovde.</li>
+    </ol>
+    <input id="keyin" type="password" placeholder="github_pat_…" autocomplete="off" aria-label="Ključ">
+    <div class="row">
+      <button class="btn ghost" value="cancel" type="submit">Odustani</button>
+      <button class="btn primary" value="ok" type="submit">Sačuvaj i ažuriraj</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(function(){
+  var REPO="cardealer-bg/cardealer-bg.github.io", WF="azuriranje.yml";
+  var API="https://api.github.com/repos/"+REPO+"/actions";
+  var KEY="cd-gh-kljuc";
+  var btn=document.getElementById("refresh"), lbl=btn.querySelector("span"),
+      st=document.getElementById("refresh-help"), dlg=document.getElementById("keydlg"),
+      inp=document.getElementById("keyin");
+  function getKey(){try{return localStorage.getItem(KEY)||""}catch(e){return ""}}
+  function setKey(v){try{v?localStorage.setItem(KEY,v):localStorage.removeItem(KEY)}catch(e){}}
+  function say(html,cls){st.className="meta"+(cls?" "+cls:"");st.innerHTML=html}
+  function busy(on,text){btn.disabled=on;btn.classList.toggle("busy",on);lbl.textContent=text||"Ažuriraj liste"}
+  function gh(path,opt){
+    opt=opt||{};opt.headers={"Accept":"application/vnd.github+json","Authorization":"Bearer "+getKey(),"X-GitHub-Api-Version":"2022-11-28"};
+    return fetch(API+path,opt);
+  }
+  function resetLink(){return ' <button class="linkbtn" type="button" id="keyreset">Unesi novi ključ</button>'}
+  st.addEventListener("click",function(e){if(e.target&&e.target.id==="keyreset"){setKey("");askKey()}});
+  function askKey(){inp.value="";if(dlg.showModal){dlg.showModal();inp.focus()}else{var v=prompt("Nalepite GitHub ključ:");if(v){setKey(v.trim());start()}}}
+  dlg.addEventListener("close",function(){if(dlg.returnValue==="ok"&&inp.value.trim()){setKey(inp.value.trim());start()}});
+  var since=0;
+  function start(){
+    if(!getKey()){askKey();return}
+    busy(true,"Pokrećem…"); since=Date.now()-60000;
+    gh("/workflows/"+WF+"/dispatches",{method:"POST",body:JSON.stringify({ref:"main"})}).then(function(r){
+      if(r.status===204){say("Ažuriranje je pokrenuto. Traje oko 10 minuta – ne morate ništa da radite, strana će se sama osvežiti.");busy(true,"Ažurira se…");setTimeout(poll,20000);return}
+      busy(false);
+      if(r.status===401){setKey("");say("Ključ nije ispravan ili je istekao."+resetLink(),"rs-err");return}
+      if(r.status===403||r.status===404){say("Ključ nema dozvolu <b>Actions: Read and write</b> za cardealer-bg.github.io."+resetLink(),"rs-err");return}
+      say("GitHub nije prihvatio zahtev (greška "+r.status+"). Pokušajte ponovo za minut.","rs-err");
+    }).catch(function(){busy(false);say("Nema veze sa GitHubom. Proverite internet i pokušajte ponovo.","rs-err")});
+  }
+  var tries=0;
+  function poll(){
+    if(++tries>60){busy(false);say("Ažuriranje traje duže nego obično. Osvežite stranu malo kasnije.");return}
+    gh("/workflows/"+WF+"/runs?per_page=1&event=workflow_dispatch").then(function(r){return r.json()}).then(function(d){
+      var run=d&&d.workflow_runs&&d.workflow_runs[0];
+      if(!run||Date.parse(run.created_at)<since||run.status!=="completed"){setTimeout(poll,20000);return}
+      if(run.conclusion==="success"){
+        busy(true,"Objavljujem…");
+        say("Gotovo! Nove liste se objavljuju, strana se osvežava za minut.","rs-ok");
+        setTimeout(function(){location.reload()},75000);
+      }else{
+        busy(false);
+        say('Ažuriranje nije uspelo. <a href="'+run.html_url+'" target="_blank" rel="noopener">Pogledaj detalje na GitHubu</a> ili pokušajte ponovo.',"rs-err");
+      }
+    }).catch(function(){setTimeout(poll,20000)});
+  }
+  btn.addEventListener("click",start);
 })();
 </script>
 </body>
