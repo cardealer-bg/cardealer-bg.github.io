@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   azuriraj:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04            # Ubuntu 26 (novi ubuntu-latest) ne podržava Playwright 1.47
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
