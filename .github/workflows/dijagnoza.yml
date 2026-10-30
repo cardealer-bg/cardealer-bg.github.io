@@ -32,9 +32,13 @@ jobs:
           step scrape python tools/scrape.py /tmp/rad
           step update python tools/update.py /tmp/rad
           ls -la /tmp/rad >>$L 2>&1; cat /tmp/rad/report.md >>$L 2>&1
-          git config user.name "CAR DEALER liste"
-          git config user.email "actions@users.noreply.github.com"
-          mkdir -p /tmp/out && cp $L /tmp/out/log.txt
-          cp -r /tmp/rad /tmp/out/rad 2>/dev/null
-          cd /tmp/out && git init -q -b dijagnoza && git add -A && git commit -qm "dijagnoza $(date -u +%FT%TZ)"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" dijagnoza
+          python3 - <<'PY'
+          import re
+          t=open("/tmp/log.txt",errors="replace").read()
+          parts=re.split(r"^===== ",t,flags=re.M)
+          for p in parts:
+              if not p.strip(): continue
+              msg=p[-3000:].replace("%","%25").replace("\r","").replace("\n","%0A")
+              print("::warning title=dijag::"+msg)
+          PY
+          gh auth status >/dev/null 2>&1; echo "::warning title=token::$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer ${{ github.token }}" https://api.github.com/repos/${{ github.repository }})"
