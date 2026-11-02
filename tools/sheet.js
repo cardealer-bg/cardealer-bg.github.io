@@ -37,6 +37,7 @@
     ".a4 .price .val{font-size:31pt;font-weight:700;line-height:1.08;white-space:nowrap}",
     ".a4 .price .note{font-size:8pt;color:var(--soft)}",
     ".a4 .price .rsd{font-size:11pt;font-weight:700;margin-top:.6mm}",
+    ".a4 .price .legal{font-size:6.6pt;color:var(--soft);line-height:1.35;margin-top:1.2mm;padding-top:1.1mm;border-top:.6pt solid var(--hair);max-width:66mm;margin-left:auto;margin-right:auto}",
     ".a4 .price .rsd small{display:block;font-size:6.8pt;font-weight:400;color:var(--soft);line-height:1.3}",
     ".a4 .price .tags{font-size:8pt;margin-top:1.4mm;border-top:.8pt solid var(--hair);padding-top:1.4mm}",
     ".a4 .specs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1.2pt solid var(--rule);border-bottom:1.2pt solid var(--rule)}",
@@ -116,6 +117,7 @@
       (car.price ? '<div class="price"><div class="lbl">CENA</div><div class="val">' + esc(car.price) + "</div>" +
         (car.price_note ? '<div class="note">' + esc(car.price_note) + "</div>" : "") +
         (rsd ? '<div class="rsd">≈ ' + rsd + ' RSD<small>srednji kurs NBS ' + esc(car.kurs_date) + ': 1 € = ' + esc(String(car.kurs_rate).replace(".", ",")) + ' din</small></div>' : "") +
+        (car.kurs_date ? '<div class="legal">Cena važi na dan ' + esc(car.kurs_date) + '.<br>Plaća se u dinarima po srednjem kursu NBS na dan plaćanja.</div>' : "") +
         (tags.length ? '<div class="tags">' + esc(tags.join("   ·   ")) + "</div>" : "") + "</div>" : "") +
       "</section>" +
       '<section class="specs">' + specs.map(function (s) {
