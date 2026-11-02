@@ -69,7 +69,7 @@ footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:cente
 <body>
 <header class="band"><div class="in">
   <img src="logo.png" alt="CAR DEALER">
-  <div><h1>Liste za štampu</h1><p>{{COUNT}} automobila u ponudi · ažurirano {{UPDATED}}</p></div>
+  <div><h1>Liste za štampu</h1><p>{{COUNT}} automobila u ponudi · ažurirano {{UPDATED}}{{KURS}}</p></div>
 </div></header>
 <main class="in">
   <section class="stats" aria-label="Pregled">
@@ -133,7 +133,7 @@ var CHANGES=/*CHANGES*/[];
         if(recent(c.changed,7)) t.appendChild(el("span","badge b-chg","IZMENA"));
       }
       left.append(t,el("div","v",c.variant));
-      top.append(left,el("div","p",c.price));
+      var pr0=el("div","p",c.price); if(c.rsd){var rs=el("div","v",c.rsd); rs.style.textAlign="right"; pr0.appendChild(rs);} top.append(left,pr0);
       var s=el("div","s",[c.year,c.km,c.fuel,c.gear].filter(Boolean).join(" · ")+" · #"+c.id);
       var acts=el("div","acts");
       var pr=el("a","btn primary","Štampaj"); pr.href=c.pdf+"?v="+encodeURIComponent(lastChange(c)); pr.target="_blank"; pr.rel="noopener";

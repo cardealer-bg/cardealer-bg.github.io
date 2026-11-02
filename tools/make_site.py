@@ -11,7 +11,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def slug(s):
     return re.sub(r"[^A-Za-z0-9]+", "_", unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()).strip("_")
 
+KURS = None
+def rsd(price):
+    if not KURS or "€" not in (price or ""): return ""
+    d = re.sub(r"[^0-9]", "", price)
+    return f"{round(int(d) * KURS['rate']):,}".replace(",", ".") + " RSD" if d else ""
+
 def main():
+    global KURS
+    kf = os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])), "kurs.json")
+    if os.path.exists(kf): KURS = json.load(open(kf))
     cars = json.load(open(sys.argv[1], encoding="utf-8"))
     changes = json.load(open(sys.argv[2], encoding="utf-8")) if os.path.exists(sys.argv[2]) else []
     pdf_dir, out = sys.argv[3], sys.argv[4]
@@ -25,7 +34,7 @@ def main():
             shutil.copy(p, os.path.join(out, "pdf", name))
         spec = {k: v for k, v in c.get("specs", [])}
         slim.append({"id": c["id"], "make": c["make"], "model": c["model"], "variant": c.get("variant", ""),
-                     "price": c.get("price", ""), "year": spec.get("Godište", "").rstrip("."), "km": spec.get("Kilometraža", ""),
+                     "price": c.get("price", ""), "rsd": rsd(c.get("price", "")), "year": spec.get("Godište", "").rstrip("."), "km": spec.get("Kilometraža", ""),
                      "fuel": spec.get("Gorivo", ""), "gear": spec.get("Menjač", ""), "power": spec.get("Snaga", ""),
                      "pdf": "pdf/" + name, "url": c.get("url", ""), "sold": bool(c.get("sold")),
                      "added": c.get("added_at", ""), "changed": c.get("changed_at", "")})
@@ -43,6 +52,7 @@ def main():
     page = (tpl.replace("/*CARS*/[]", json.dumps(slim, ensure_ascii=False))
                .replace("/*CHANGES*/[]", json.dumps(chg, ensure_ascii=False))
                .replace("{{UPDATED}}", html.escape(stamp))
+               .replace("{{KURS}}", (" · srednji kurs NBS " + KURS["date"] + ": 1 € = " + str(KURS["rate"]).replace(".", ",") + " din") if KURS else "")
                .replace("{{COUNT}}", str(sum(1 for c in slim if not c["sold"]))))
     open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(page)
     print("ok", out, len(slim), "cars")

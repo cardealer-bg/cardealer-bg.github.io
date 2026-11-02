@@ -10,6 +10,9 @@ DEALER_URL = "https://www.polovniautomobili.com/car-dealer-bg?paPage=adpg&paSect
 
 def main():
     car = json.load(open(sys.argv[1])); out = sys.argv[2]
+    kf = os.environ.get("KURS_FILE") or os.path.join(HERE, "..", "data", "kurs.json")
+    if os.path.exists(kf):
+        k = json.load(open(kf)); car["kurs_rate"] = k["rate"]; car["kurs_date"] = k["date"]
     qr = lambda u: subprocess.check_output(["node", os.path.join(HERE, "qr.js"), u]).decode()
     if car.get("url"):
         car["qr_svg"] = qr(car["url"])

@@ -36,6 +36,8 @@
     ".a4 .price .lbl{font-size:8.5pt;letter-spacing:.34em;font-weight:600}",
     ".a4 .price .val{font-size:31pt;font-weight:700;line-height:1.08;white-space:nowrap}",
     ".a4 .price .note{font-size:8pt;color:var(--soft)}",
+    ".a4 .price .rsd{font-size:11pt;font-weight:700;margin-top:.6mm}",
+    ".a4 .price .rsd small{display:block;font-size:6.8pt;font-weight:400;color:var(--soft);line-height:1.3}",
     ".a4 .price .tags{font-size:8pt;margin-top:1.4mm;border-top:.8pt solid var(--hair);padding-top:1.4mm}",
     ".a4 .specs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1.2pt solid var(--rule);border-bottom:1.2pt solid var(--rule)}",
     ".a4 .spec{padding:1.7mm 2.4mm 1.7mm 0;border-bottom:.6pt solid var(--hair)}",
@@ -90,6 +92,9 @@
 
   window.renderSheet = function (car) {
     var L = window.CD_LOGO || {};
+    var rsd = "";
+    var eur = parseInt(String(car.price || "").replace(/[^0-9]/g, ""), 10);
+    if (eur && car.kurs_rate && /€/.test(car.price || "")) rsd = Math.round(eur * car.kurs_rate).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     var specs = (car.specs || []).filter(function (s) { return s[1] && s[1] !== "—"; }).slice(0, 16);
     while (specs.length % 4) specs.push(["", ""]);
     var li = function (arr, icon) {
@@ -110,6 +115,7 @@
       "</div>" + (car.variant ? '<div class="variant">' + esc(car.variant) + "</div>" : "") + "</div>" +
       (car.price ? '<div class="price"><div class="lbl">CENA</div><div class="val">' + esc(car.price) + "</div>" +
         (car.price_note ? '<div class="note">' + esc(car.price_note) + "</div>" : "") +
+        (rsd ? '<div class="rsd">≈ ' + rsd + ' RSD<small>srednji kurs NBS ' + esc(car.kurs_date) + ': 1 € = ' + esc(String(car.kurs_rate).replace(".", ",")) + ' din</small></div>' : "") +
         (tags.length ? '<div class="tags">' + esc(tags.join("   ·   ")) + "</div>" : "") + "</div>" : "") +
       "</section>" +
       '<section class="specs">' + specs.map(function (s) {
