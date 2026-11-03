@@ -54,7 +54,7 @@
     ".a4 .lz .c .v{font-size:11pt;font-weight:700;white-space:nowrap;line-height:1.2}",
     ".a4 .lz .c.r .v{font-size:14pt}",
     ".a4 .lz .c .v span{font-size:8pt;font-weight:500;color:var(--soft);margin-left:1mm}",
-    ".a4 .lzn{text-align:center;font-size:6.6pt;color:var(--soft);margin:0 0 2.2mm;line-height:1.35}",
+    ".a4 .lzn b{color:var(--ink);font-weight:600}",".a4 .lzn{text-align:center;font-size:6.6pt;color:var(--soft);margin:0 0 2.2mm;line-height:1.35}",
     ".a4 .specs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1.2pt solid var(--rule);border-bottom:1.2pt solid var(--rule)}",
     ".a4 .spec{padding:1.1mm 2.4mm 1.1mm 0;border-bottom:.6pt solid var(--hair)}",
     ".a4 .spec:nth-child(4n+2),.a4 .spec:nth-child(4n+3),.a4 .spec:nth-child(4n+4){padding-left:3mm;border-left:.6pt solid var(--hair)}",
@@ -122,8 +122,7 @@
         '<div class="c"><div class="k">Period</div><div class="v">' + n + " rata</div></div>" +
         '<div class="c r"><div class="k">Okvirna mesečna rata</div><div class="v">≈ ' + dot(rata) + " €" +
         (car.kurs_rate ? "<span>≈ " + dot(rata * car.kurs_rate) + " din</span>" : "") + "</div></div></section>" +
-        '<div class="lzn">Informativni obračun na dan ' + esc(Z.date) + ": finansijski lizing, nominalna kamatna stopa " + String(Z.rate).replace(".", ",") + "% (" + esc(Z.rate_note) +
-        "), bez preostale vrednosti. Sva plaćanja u dinarima po srednjem kursu NBS na dan plaćanja. Pri zaključenju se plaćaju i troškovi obrade i registracije (oko " + dot(Z.upfront_costs) + " €) i PDV na kamatu; obavezno kasko osiguranje. Konačna ponuda zavisi od procene boniteta.</div>";
+        '<div class="lzn">Informativni obračun ' + esc(Z.provider) + " na dan " + esc(Z.date) + ": učešće " + Z.down_pct + "%, " + n + " mesečnih rata, kamatna stopa " + String(Z.rate).replace(".", ",") + "% (" + esc(Z.rate_note) + "). <b>Troškovi obrade kredita nisu uračunati u ovu cifru.</b> Plaćanje u dinarima po srednjem kursu NBS na dan plaćanja. Konačna ponuda zavisi od procene boniteta.</div>";
     }
     var specs = (car.specs || []).filter(function (s) { return s[1] && s[1] !== "—"; }).slice(0, 16);
     while (specs.length % 4) specs.push(["", ""]);
