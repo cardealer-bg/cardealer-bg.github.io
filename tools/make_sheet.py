@@ -26,13 +26,28 @@ def main():
             f"var car={json.dumps(car, ensure_ascii=False)};"
             "var st=document.createElement('style');st.textContent=SHEET_CSS;document.head.appendChild(st);"
             "document.getElementById('root').innerHTML=renderSheet(car);document.fonts.ready.then(function(){fitSheet(document);});</script></body></html>")
+    def page(c):
+        return ("<!doctype html><html><head><meta charset='utf-8'><style>@page{size:A4;margin:0}html,body{margin:0}</style>"
+            f"<script>{js}</script></head><body><div id='root'></div><script>"
+            f"var car={json.dumps(c, ensure_ascii=False)};"
+            "var st=document.createElement('style');st.textContent=SHEET_CSS;document.head.appendChild(st);"
+            "document.getElementById('root').innerHTML=renderSheet(car);document.fonts.ready.then(function(){fitSheet(document);});</script></body></html>")
+    # second version without the leasing box: <name>_bez_lizinga.pdf (staff chooses which one to print)
+    jobs = [(car, out, sys.argv[3] if len(sys.argv) > 3 else None)]
+    if car.get("lizing") and out.endswith(".pdf") and not out.endswith("_bez_lizinga.pdf"):
+        jobs.append(({k: v for k, v in car.items() if k != "lizing"}, out[:-4] + "_bez_lizinga.pdf", None))
+    fit = None
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page()
-        pg.set_content(html, wait_until="load")
-        fit = pg.evaluate("document.fonts.ready.then(()=>fitSheet(document))")
-        pg.pdf(path=out, format="A4", print_background=True, margin={"top": "0", "right": "0", "bottom": "0", "left": "0"})
-        if len(sys.argv) > 3:  # optional PNG preview
-            pg.set_viewport_size({"width": 794, "height": 1123}); pg.screenshot(path=sys.argv[3], full_page=False)
+        b = p.chromium.launch()
+        for c, o, png in jobs:
+            pg = b.new_page()
+            pg.set_content(page(c), wait_until="load")
+            f = pg.evaluate("document.fonts.ready.then(()=>fitSheet(document))")
+            fit = fit or f
+            pg.pdf(path=o, format="A4", print_background=True, margin={"top": "0", "right": "0", "bottom": "0", "left": "0"})
+            if png:  # optional PNG preview
+                pg.set_viewport_size({"width": 794, "height": 1123}); pg.screenshot(path=png, full_page=False)
+            pg.close()
         b.close()
     # keep the QR in the json so the web page can show it too
     json.dump(car, open(sys.argv[1], "w"), ensure_ascii=False, indent=1)

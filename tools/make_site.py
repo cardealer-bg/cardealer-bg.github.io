@@ -32,15 +32,24 @@ def main():
         p = os.path.join(pdf_dir, name)
         if os.path.exists(p):
             shutil.copy(p, os.path.join(out, "pdf", name))
+        name2 = name[:-4] + "_bez_lizinga.pdf"
+        p2 = os.path.join(pdf_dir, name2)
+        if os.path.exists(p2):
+            shutil.copy(p2, os.path.join(out, "pdf", name2))
+        else:
+            name2 = ""
         spec = {k: v for k, v in c.get("specs", [])}
         slim.append({"id": c["id"], "make": c["make"], "model": c["model"], "variant": c.get("variant", ""),
                      "price": c.get("price", ""), "rsd": rsd(c.get("price", "")), "year": spec.get("Godište", "").rstrip("."), "km": spec.get("Kilometraža", ""),
                      "fuel": spec.get("Gorivo", ""), "gear": spec.get("Menjač", ""), "power": spec.get("Snaga", ""),
-                     "pdf": "pdf/" + name, "url": c.get("url", ""), "sold": bool(c.get("sold")),
+                     "pdf": "pdf/" + name, "pdf2": ("pdf/" + name2) if name2 else "", "url": c.get("url", ""), "sold": bool(c.get("sold")),
                      "added": c.get("added_at", ""), "changed": c.get("changed_at", "")})
     all_pdf = os.path.join(pdf_dir, "CAR_DEALER_sve_liste_A4.pdf")
     if os.path.exists(all_pdf):
         shutil.copy(all_pdf, os.path.join(out, "pdf", "CAR_DEALER_sve_liste_A4.pdf"))
+    all2 = os.path.join(pdf_dir, "CAR_DEALER_sve_liste_A4_bez_lizinga.pdf")
+    if os.path.exists(all2):
+        shutil.copy(all2, os.path.join(out, "pdf", "CAR_DEALER_sve_liste_A4_bez_lizinga.pdf"))
     for f in ("manifest.webmanifest", "sw.js", "icon-192.png", "icon-512.png", "favicon.ico"):
         src = os.path.join(HERE, f) if os.path.exists(os.path.join(HERE, f)) else os.path.join(HERE, "app", f)
         if os.path.exists(src): shutil.copy(src, os.path.join(out, f))

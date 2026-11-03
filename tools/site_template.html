@@ -38,7 +38,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Poppins,"Segoe UI
 .s{font-size:12.5px;color:var(--muted)}
 .badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:2px}
 .b-new{background:var(--mint);color:#063a52}.b-chg{background:var(--warn);color:#3a2a00}.b-sold{background:var(--line);color:var(--muted)}
-.acts{display:flex;gap:8px;margin-top:2px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
 .acts .btn{flex:1;padding:9px 10px;font-size:14px}
 h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:30px 0 10px}
 .chg{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 14px}
@@ -80,7 +80,8 @@ footer{color:var(--muted);font-size:12px;padding:30px 16px 40px;text-align:cente
   </section>
   <div class="tools">
     <input id="q" type="search" placeholder="Pretraga: marka, model, godište ili broj oglasa" aria-label="Pretraga" autocomplete="off">
-    <a class="btn primary" href="pdf/CAR_DEALER_sve_liste_A4.pdf" target="_blank" rel="noopener">Sve liste (jedan PDF)</a>
+    <a class="btn primary" href="pdf/CAR_DEALER_sve_liste_A4.pdf" target="_blank" rel="noopener">Sve liste – sa lizingom</a>
+    <a class="btn ghost" href="pdf/CAR_DEALER_sve_liste_A4_bez_lizinga.pdf" target="_blank" rel="noopener">Sve liste – bez lizinga</a>
     <button class="btn ghost" id="install" type="button" hidden>Instaliraj na računar</button>
     <button class="btn ghost" id="upd" type="button">↻ Ažuriraj sada</button>
   </div>
@@ -136,8 +137,9 @@ var CHANGES=/*CHANGES*/[];
       var pr0=el("div","p",c.price); if(c.rsd){var rs=el("div","v",c.rsd); rs.style.textAlign="right"; pr0.appendChild(rs);} top.append(left,pr0);
       var s=el("div","s",[c.year,c.km,c.fuel,c.gear].filter(Boolean).join(" · ")+" · #"+c.id);
       var acts=el("div","acts");
-      var pr=el("a","btn primary","Štampaj"); pr.href=c.pdf+"?v="+encodeURIComponent(lastChange(c)); pr.target="_blank"; pr.rel="noopener";
+      var pr=el("a","btn primary",c.pdf2?"Štampaj s lizingom":"Štampaj"); pr.href=c.pdf+"?v="+encodeURIComponent(lastChange(c)); pr.target="_blank"; pr.rel="noopener";
       acts.appendChild(pr);
+      if(c.pdf2){var pr2=el("a","btn ghost","Bez lizinga"); pr2.href=c.pdf2+"?v="+encodeURIComponent(lastChange(c)); pr2.target="_blank"; pr2.rel="noopener"; acts.appendChild(pr2)}
       if(c.url){var ad=el("a","btn ghost","Oglas"); ad.href=c.url; ad.target="_blank"; ad.rel="noopener"; acts.appendChild(ad)}
       card.append(top,s,acts);
       if(!c.sold){
@@ -169,6 +171,8 @@ var CHANGES=/*CHANGES*/[];
   }
   var allA=document.querySelector('a[href="pdf/CAR_DEALER_sve_liste_A4.pdf"]');
   if(allA) allA.href+="?v="+encodeURIComponent(CARS.map(lastChange).sort().pop()||"");
+  var allB=document.querySelector('a[href="pdf/CAR_DEALER_sve_liste_A4_bez_lizinga.pdf"]');
+  if(allB) allB.href+="?v="+encodeURIComponent(CARS.map(lastChange).sort().pop()||"");
   stats();
   render("");
   changesList();
