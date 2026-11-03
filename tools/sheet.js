@@ -28,13 +28,13 @@
     ".a4 .hd img{width:40mm;height:auto;display:block}",
     ".a4 .hd .meta{text-align:right;font-size:8.5pt;color:var(--soft);line-height:1.55}",".a4 .hd .right{display:flex;align-items:center;gap:4mm}",".a4 .hd .dq{display:flex;align-items:center;gap:2.4mm;border-left:.8pt solid var(--hair);padding-left:4mm}",".a4 .hd .dq .box{width:19mm;height:19mm;border:1pt solid var(--ink);border-radius:1.5mm;padding:.8mm}",".a4 .hd .dq .box svg{width:100%;height:100%;display:block}",".a4 .hd .dq b{display:block;font-size:7.6pt;letter-spacing:.16em;line-height:1.3}",".a4 .hd .dq span{display:block;font-size:7pt;color:var(--soft);line-height:1.3}",
     ".a4 .hd .meta b{display:block;font-size:10pt;letter-spacing:.24em;color:var(--ink);font-weight:700}",
-    ".a4 .hero{display:flex;justify-content:space-between;align-items:center;gap:6mm;padding:2.6mm 0 2.4mm}",
+    ".a4 .hero{display:flex;justify-content:space-between;align-items:center;gap:6mm;padding:2.2mm 0 2mm}",
     ".a4 .make{font-size:10.5pt;letter-spacing:.34em;font-weight:600;text-transform:uppercase}",
-    ".a4 .model{font-size:34pt;font-weight:700;line-height:1;margin:1.2mm 0 1.6mm;letter-spacing:-.01em}",
+    ".a4 .model{font-size:30pt;font-weight:700;line-height:1;margin:.8mm 0 1.2mm;letter-spacing:-.01em}",
     ".a4 .variant{font-size:12pt;color:var(--soft)}",
     ".a4 .hero .tagbox{text-align:right;font-size:8.5pt;line-height:1.6;color:var(--soft)}",
     ".a4 .hero .tagbox b{color:var(--ink)}",
-    ".a4 .pb{display:grid;grid-template-columns:1fr 1.55fr 1fr;align-items:center;background:#ececec;border-radius:3.5mm;padding:2.6mm 5mm;margin:0 0 1.2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}",
+    ".a4 .pb{display:grid;grid-template-columns:1fr 1.55fr 1fr;align-items:center;background:#ececec;border-radius:3.5mm;padding:2.6mm 5mm;margin:0 0 1.6mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}",
     ".a4 .pb .k{font-size:7pt;letter-spacing:.22em;font-weight:600;color:var(--soft);text-transform:uppercase}",
     ".a4 .pb .eur .v{font-size:19pt;font-weight:700;line-height:1.1;margin-top:.6mm;white-space:nowrap}",
     ".a4 .pb .eur .n{font-size:7.4pt;color:var(--soft);margin-top:.4mm}",
@@ -46,16 +46,25 @@
     ".a4 .pb .when .tg{margin-top:1.2mm;font-size:7.2pt}",
     ".a4 .pb .when b{display:block;font-size:10pt;color:var(--ink);font-weight:700}",
     ".a4 .legal{text-align:center;font-size:7pt;color:var(--soft);margin:0 0 2.2mm}",
+    ".a4 .lz{display:grid;grid-template-columns:auto 1fr 1fr 1.3fr;align-items:center;gap:0;border:1pt solid var(--ink);border-radius:3.5mm;padding:1.3mm 4mm;margin:0 0 .8mm}",
+    ".a4 .lz .t{font-size:8.5pt;letter-spacing:.24em;font-weight:700;padding-right:4mm;line-height:1.25}",
+    ".a4 .lz .t small{display:block;font-size:6.8pt;letter-spacing:.04em;font-weight:500;color:var(--soft)}",
+    ".a4 .lz .c{padding:0 3.5mm;border-left:.6pt solid var(--hair)}",
+    ".a4 .lz .c .k{font-size:6.8pt;letter-spacing:.18em;font-weight:600;color:var(--soft);text-transform:uppercase}",
+    ".a4 .lz .c .v{font-size:11pt;font-weight:700;white-space:nowrap;line-height:1.2}",
+    ".a4 .lz .c.r .v{font-size:14pt}",
+    ".a4 .lz .c .v span{font-size:8pt;font-weight:500;color:var(--soft);margin-left:1mm}",
+    ".a4 .lzn{text-align:center;font-size:6.6pt;color:var(--soft);margin:0 0 2.2mm;line-height:1.35}",
     ".a4 .specs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1.2pt solid var(--rule);border-bottom:1.2pt solid var(--rule)}",
-    ".a4 .spec{padding:1.7mm 2.4mm 1.7mm 0;border-bottom:.6pt solid var(--hair)}",
+    ".a4 .spec{padding:1.1mm 2.4mm 1.1mm 0;border-bottom:.6pt solid var(--hair)}",
     ".a4 .spec:nth-child(4n+2),.a4 .spec:nth-child(4n+3),.a4 .spec:nth-child(4n+4){padding-left:3mm;border-left:.6pt solid var(--hair)}",
     ".a4 .spec:nth-last-child(-n+4){border-bottom:0}",
     ".a4 .spec .k{font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}",
     ".a4 .spec .v{font-size:9.8pt;font-weight:600;line-height:1.25;margin-top:.4mm}",
-    ".a4 .hl{display:flex;flex-wrap:wrap;gap:1.6mm;align-items:center;padding:3mm 0 0}",
+    ".a4 .hl{display:flex;flex-wrap:wrap;gap:1.6mm;align-items:center;padding:2.4mm 0 0}",
     ".a4 .hl .t{font-size:8pt;letter-spacing:.24em;font-weight:700;margin-right:1mm}",
     ".a4 .hl span.p{border:1pt solid var(--ink);font-weight:600;font-size:8.2pt;border-radius:9mm;padding:.5mm 2.8mm}",
-    ".a4 .body{margin-top:3.5mm;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:4mm;--k:1}",
+    ".a4 .body{margin-top:3mm;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:4mm;--k:1}",
     ".a4 .row3{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:6mm}",
     ".a4 h3{font-size:8.5pt;letter-spacing:.24em;font-weight:700;margin:0 0 1.8mm;padding-bottom:1.3mm;border-bottom:1.2pt solid var(--rule)}",
     ".a4 ul{list-style:none;margin:0;padding:0}",
@@ -102,6 +111,20 @@
     var rsd = "";
     var eur = parseInt(String(car.price || "").replace(/[^0-9]/g, ""), 10);
     if (eur && car.kurs_rate && /€/.test(car.price || "")) rsd = Math.round(eur * car.kurs_rate).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    var lz = "";
+    var Z = car.lizing;
+    if (eur && Z && /€/.test(car.price || "")) {
+      var dot = function (n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); };
+      var down = eur * Z.down_pct / 100, fin = eur - down, r = Z.rate / 1200, n = Z.months;
+      var rata = fin * r / (1 - Math.pow(1 + r, -n));
+      lz = '<section class="lz"><div class="t">LIZING<small>' + esc(Z.provider) + "</small></div>" +
+        '<div class="c"><div class="k">Učešće ' + Z.down_pct + '%</div><div class="v">' + dot(down) + " €</div></div>" +
+        '<div class="c"><div class="k">Period</div><div class="v">' + n + " rata</div></div>" +
+        '<div class="c r"><div class="k">Okvirna mesečna rata</div><div class="v">≈ ' + dot(rata) + " €" +
+        (car.kurs_rate ? "<span>≈ " + dot(rata * car.kurs_rate) + " din</span>" : "") + "</div></div></section>" +
+        '<div class="lzn">Informativni obračun na dan ' + esc(Z.date) + ": finansijski lizing, nominalna kamatna stopa " + String(Z.rate).replace(".", ",") + "% (" + esc(Z.rate_note) +
+        "), bez preostale vrednosti. Sva plaćanja u dinarima po srednjem kursu NBS na dan plaćanja. Pri zaključenju se plaćaju i troškovi obrade i registracije (oko " + dot(Z.upfront_costs) + " €) i PDV na kamatu; obavezno kasko osiguranje. Konačna ponuda zavisi od procene boniteta.</div>";
+    }
     var specs = (car.specs || []).filter(function (s) { return s[1] && s[1] !== "—"; }).slice(0, 16);
     while (specs.length % 4) specs.push(["", ""]);
     var li = function (arr, icon) {
@@ -127,7 +150,7 @@
              : '<div></div><div class="din"><div class="k">Cena</div><div class="v">' + esc(car.price) + "</div>" + (car.price_note ? '<div class="n">' + esc(car.price_note) + "</div>" : "") + "</div>") +
         '<div class="when">' + (car.kurs_date ? 'Cena važi na dan<b>' + esc(car.kurs_date) + "</b>" : "") +
           (tags.length ? '<div class="tg">' + esc(tags.join(" · ")) + "</div>" : "") + "</div>" +
-        "</section>" + (rsd ? '<div class="legal">Plaćanje se vrši u dinarima, po zvaničnom srednjem kursu NBS na dan plaćanja.</div>' : "") : "") +
+        "</section>" + (rsd && !lz ? '<div class="legal">Plaćanje se vrši u dinarima, po zvaničnom srednjem kursu NBS na dan plaćanja.</div>' : "") : "") + lz +
       '<section class="specs">' + specs.map(function (s) {
         return '<div class="spec"><div class="k">' + esc(s[0]) + '</div><div class="v">' + esc(s[1]) + "</div></div>";
       }).join("") + "</section>" +

@@ -13,6 +13,9 @@ def main():
     kf = os.environ.get("KURS_FILE") or os.path.join(HERE, "..", "data", "kurs.json")
     if os.path.exists(kf):
         k = json.load(open(kf)); car["kurs_rate"] = k["rate"]; car["kurs_date"] = k["date"]
+    lf = os.environ.get("LIZING_FILE") or os.path.join(HERE, "..", "data", "lizing.json")
+    if os.path.exists(lf):
+        car["lizing"] = json.load(open(lf))
     qr = lambda u: subprocess.check_output(["node", os.path.join(HERE, "qr.js"), u]).decode()
     if car.get("url"):
         car["qr_svg"] = qr(car["url"])
