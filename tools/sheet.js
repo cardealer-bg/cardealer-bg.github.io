@@ -103,6 +103,14 @@
         more.firstChild.textContent = "+ još " + (total - items().length) + " stavki opreme u oglasu (QR kod)";
       }
     }
+    /* still too long: shorten the safety list too */
+    var sf = b.querySelector(".sf");
+    if (sf && over()) {
+      var tot = +sf.getAttribute("data-total") || 0, m2 = sf.querySelector("li.more");
+      if (!m2) { m2 = document.createElement("li"); m2.className = "more"; m2.appendChild(document.createElement("span")); sf.appendChild(m2); }
+      var its = function () { return sf.querySelectorAll("li:not(.more)"); };
+      while (over() && its().length > 4) { var x = its(); x[x.length - 1].remove(); m2.firstChild.textContent = "+ još " + (tot - its().length); }
+    }
     return { k: +k.toFixed(2), fits: !over(), shown: ul ? ul.querySelectorAll("li:not(.more)").length : 0 };
   };
 
@@ -116,13 +124,18 @@
     if (eur && Z && /€/.test(car.price || "")) {
       var dot = function (n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); };
       var down = eur * Z.down_pct / 100, fin = eur - down, r = Z.rate / 1200, n = Z.months;
-      var rata = fin * r / (1 - Math.pow(1 + r, -n));
-      lz = '<section class="lz"><div class="t">LIZING<small>' + esc(Z.provider) + "</small></div>" +
+      var rata = Math.round(fin * r / (1 - Math.pow(1 + r, -n)) * 100) / 100;
+      var F = Z.fees || {}, kam = rata * n - fin, pdvk = kam * (Z.vat_on_interest_pct || 0) / 100;
+      var fix = (F.obrada || 0) + (F.registar || 0) + (F.biro || 0), tros = fix + pdvk;
+      var c2 = function (x) { return x.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, "."); };
+      lz = '<section class="lz"><div class="t">LIZING<small>' + esc(Z.provider) + "<br>" + n + " mesečnih rata</small></div>" +
         '<div class="c"><div class="k">Učešće ' + Z.down_pct + '%</div><div class="v">' + dot(down) + " €</div></div>" +
-        '<div class="c"><div class="k">Period</div><div class="v">' + n + " rata</div></div>" +
+        '<div class="c"><div class="k">Troškovi obrade</div><div class="v">' + dot(tros) + " €</div></div>" +
         '<div class="c r"><div class="k">Okvirna mesečna rata</div><div class="v">≈ ' + dot(rata) + " €" +
         (car.kurs_rate ? "<span>≈ " + dot(rata * car.kurs_rate) + " din</span>" : "") + "</div></div></section>" +
-        '<div class="lzn">Informativni obračun ' + esc(Z.provider) + " na dan " + esc(Z.date) + ": učešće " + Z.down_pct + "%, " + n + " mesečnih rata, kamatna stopa " + String(Z.rate).replace(".", ",") + "% (" + esc(Z.rate_note) + "). <b>Troškovi obrade kredita nisu uračunati u ovu cifru.</b> Plaćanje u dinarima po srednjem kursu NBS na dan plaćanja. Konačna ponuda zavisi od procene boniteta.</div>";
+        '<div class="lzn">Informativni obračun ' + esc(Z.provider) + " na dan " + esc(Z.date) + ": kamatna stopa " + String(Z.rate).replace(".", ",") + "% (" + esc(Z.rate_note) + "). " +
+        "<b>Troškovi obrade plaćaju se jednokratno pri zaključenju ugovora, uz učešće (ukupno " + dot(down + tros) + " €), i nisu uračunati u ratu:</b> obrada zahteva " + c2(F.obrada || 0) + " €, upis u Registar lizinga " + c2(F.registar || 0) + " €, kreditni biro " + c2(F.biro || 0) + " €, PDV na kamatu " + c2(pdvk) + " €. " +
+        "Plaćanje u dinarima po srednjem kursu NBS na dan plaćanja. Konačna ponuda zavisi od procene boniteta.</div>";
     }
     var specs = (car.specs || []).filter(function (s) { return s[1] && s[1] !== "—"; }).slice(0, 16);
     while (specs.length % 4) specs.push(["", ""]);
@@ -161,7 +174,7 @@
         "</ul></div>" : "") +
       '<div class="row3">' +
       ((car.condition || []).length ? '<div><h3>STANJE</h3><ul class="chk">' + li(car.condition, CHECK) + "</ul></div>" : "<div></div>") +
-      ((car.safety || []).length ? '<div><h3>SIGURNOST</h3><ul>' + li(car.safety.slice(0, car.safety.length > MAX_SAFE + 2 ? MAX_SAFE : 99), DOT) + (car.safety.length > MAX_SAFE + 2 ? '<li class="more"><span>+ još ' + (car.safety.length - MAX_SAFE) + "</span></li>" : "") + "</ul></div>" : "<div></div>") +
+      ((car.safety || []).length ? '<div><h3>SIGURNOST</h3><ul class="sf" data-total="' + car.safety.length + '">' + li(car.safety.slice(0, car.safety.length > MAX_SAFE + 2 ? MAX_SAFE : 99), DOT) + (car.safety.length > MAX_SAFE + 2 ? '<li class="more"><span>+ još ' + (car.safety.length - MAX_SAFE) + "</span></li>" : "") + "</ul></div>" : "<div></div>") +
       (car.note ? '<div><h3>O VOZILU</h3><p class="desc">' + esc(car.note) + "</p></div>" : "<div></div>") +
       "</div></section>" +
       '<footer class="ft"><div><h4>CAR DEALER VAM OMOGUĆAVA</h4><ul class="chk">' + li(SERVICES, CHECK) + "</ul>" +

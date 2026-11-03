@@ -1,1 +1,1 @@
-{"provider": "NLB Lease&Go", "date": "03.11.2026", "rate": 6.426, "rate_note": "3M EURIBOR 2,676% + 3,75%", "months": 60, "down_pct": 25, "upfront_costs": 383.70}
+{"provider": "NLB Lease&Go", "date": "03.11.2026", "rate": 6.426, "rate_note": "3M EURIBOR 2,676% + 3,75%", "months": 60, "down_pct": 25, "fees": {"obrada": 300.00, "registar": 71.45, "biro": 12.25}, "vat_on_interest_pct": 20}
