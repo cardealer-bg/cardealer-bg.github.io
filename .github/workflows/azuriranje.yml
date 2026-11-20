@@ -20,25 +20,25 @@ concurrency:
 
 jobs:
   azuriraj:
-    runs-on: ubuntu-24.04            # Ubuntu 26 (novi ubuntu-latest) ne podržava Playwright 1.47
+    # radi na računaru u kancelariji/kod kuće (Mac, mrežna veza koju Polovni ne blokiraju);
+    # instalacija: curl -fsSL https://cardealer-bg.github.io/tools/mac-runner.sh | bash
+    runs-on: [self-hosted, cardealer]
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: Instalacija alata
+      - name: Alati
         run: |
-          pip install playwright==1.47.0 pypdf==5.0.1
-          python -m playwright install --with-deps chromium
-          sudo apt-get install -y fonts-dejavu-core fonts-liberation >/dev/null
-          npm install --prefix /tmp/qr qrcode-terminal@0.12.0
+          V="$HOME/cardealer-runner/venv"
+          "$V/bin/pip" install -q playwright pypdf
+          "$V/bin/python" -m playwright install chromium
+          echo "$V/bin" >> "$GITHUB_PATH"
+          npm install -s --prefix "$HOME/cardealer-runner/qr" qrcode-terminal@0.12.0
+          rm -rf /tmp/rad
 
       - name: Čitanje oglasa sa Polovnih automobila
         id: scrape
@@ -53,10 +53,9 @@ jobs:
           fi
 
       - name: Poređenje, PDF liste i sajt
-        env:
-          QR_LIB: /tmp/qr/node_modules/qrcode-terminal/vendor/QRCode
         run: |
           set +e
+          export QR_LIB="$HOME/cardealer-runner/qr/node_modules/qrcode-terminal/vendor/QRCode"
           python tools/update.py /tmp/rad
           code=$?
           cat /tmp/rad/report.md >> "$GITHUB_STEP_SUMMARY"
