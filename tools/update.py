@@ -52,6 +52,12 @@ def main():
             n["src"] = {f: n[f] for f in ("equipment", "safety", "condition")}
         else:
             typ_list = []
+            def eur(x): return int(re.sub(r"\D", "", x or "") or 0)
+            if eur(o.get("price")) and eur(n["price"]) and not 0.5 <= eur(n["price"]) / eur(o.get("price")) <= 2:
+                # price more than halved or doubled: almost surely misread, keep the sheet as it is
+                rep["Nije pročitano"].append(f'{o["make"]} {o["model"]} (#{i}) – sumnjiva cena {n["price"]}, '
+                                             f'na listi ostaje {o.get("price")}')
+                continue
             if o.get("price") != n["price"]:
                 typ_list.append(("cena", [{"field": "Cena", "old": o.get("price", ""), "new": n["price"]}]))
             d = []
