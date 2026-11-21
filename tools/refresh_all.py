@@ -10,8 +10,8 @@ for c in act:
     keep = {k: v for k, v in c.items() if k not in ("changes", "added_at", "changed_at", "sold", "sold_at", "pdf_file")}
     fd, js = tempfile.mkstemp(suffix=".json"); os.close(fd)
     json.dump(keep, open(js, "w"), ensure_ascii=False)
-    o = subprocess.run(["python3", os.path.join(T, "make_sheet.py"), js, c["pdf_file"]], capture_output=True, text=True)
+    o = subprocess.run([sys.executable, os.path.join(T, "make_sheet.py"), js, c["pdf_file"]], capture_output=True, text=True)
     if "'fits': True" not in o.stdout: bad.append(c["id"])
     os.remove(js)
-subprocess.run(["python3", os.path.join(T, "merge_all.py"), "pdf/CAR_DEALER_sve_liste_A4.pdf"] + [c["pdf_file"] for c in act], check=True)
+subprocess.run([sys.executable, os.path.join(T, "merge_all.py"), "pdf/CAR_DEALER_sve_liste_A4.pdf"] + [c["pdf_file"] for c in act], check=True)
 print("ok", len(act), "not fitting:", bad)
