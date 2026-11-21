@@ -24,7 +24,7 @@ mkdir -p "$DIR"
 
 say "3/5  Probno čitanje oglasa sa Polovnih automobila…"
 T=$(mktemp -d)
-curl -fsSL "$REPO/archive/refs/heads/main.tar.gz" | tar -xz -C "$T" --strip-components=1 tools
+curl -fsSL "$REPO/archive/refs/heads/main.tar.gz" | tar -xz -C "$T" --strip-components=1
 if "$DIR/venv/bin/python" "$T/tools/scrape.py" "$T/proba" >/dev/null 2>&1 && \
    "$DIR/venv/bin/python" -c "import json,sys;d=json.load(open('$T/proba/list.json'));n=len(d['ads']);print('Pročitano oglasa:',n);sys.exit(0 if n>0 else 1)"; then
   say "OK – Polovni automobili se čitaju sa ovog računara."
