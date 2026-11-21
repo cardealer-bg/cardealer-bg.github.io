@@ -20,10 +20,16 @@ concurrency:
 
 jobs:
   azuriraj:
-    # radi na računaru u kancelariji/kod kuće (Mac, mrežna veza koju Polovni ne blokiraju);
-    # instalacija: curl -fsSL https://cardealer-bg.github.io/tools/mac-runner.sh | bash
+    # radi na računaru kod kuće (Mac ili Windows; mrežna veza koju Polovni ne blokiraju);
+    # instalacija Mac:     curl -fsSL https://cardealer-bg.github.io/tools/mac-runner.sh | bash
+    # instalacija Windows: irm https://cardealer-bg.github.io/tools/win-runner.ps1 | iex
     runs-on: [self-hosted, cardealer]
     timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHONUTF8: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -33,18 +39,24 @@ jobs:
 
       - name: Alati
         run: |
-          V="$HOME/cardealer-runner/venv"
-          "$V/bin/pip" install -q playwright pypdf
-          "$V/bin/python" -m playwright install chromium
-          echo "$V/bin" >> "$GITHUB_PATH"
-          npm install -s --prefix "$HOME/cardealer-runner/qr" qrcode-terminal@0.12.0
-          rm -rf /tmp/rad
+          if command -v cygpath >/dev/null; then   # Windows (Git Bash)
+            R="$(cygpath -m "$USERPROFILE")/cardealer-runner"; BIN="$R/venv/Scripts"
+            RAD="$(cygpath -m "$RUNNER_TEMP")/rad"; cygpath -w "$BIN" >> "$GITHUB_PATH"
+          else                                     # Mac
+            R="$HOME/cardealer-runner"; BIN="$R/venv/bin"
+            RAD="$RUNNER_TEMP/rad"; echo "$BIN" >> "$GITHUB_PATH"
+          fi
+          "$BIN/python" -m pip install -q playwright pypdf tzdata
+          "$BIN/python" -m playwright install chromium
+          npm install -s --prefix "$R/qr" qrcode-terminal@0.12.0
+          rm -rf "$RAD"
+          echo "R=$R" >> "$GITHUB_ENV"; echo "RAD=$RAD" >> "$GITHUB_ENV"
 
       - name: Čitanje oglasa sa Polovnih automobila
         id: scrape
         run: |
           set +e
-          python tools/scrape.py /tmp/rad
+          python tools/scrape.py "$RAD"
           code=$?
           echo "code=$code" >> "$GITHUB_OUTPUT"
           if [ $code -ne 0 ]; then
@@ -55,10 +67,10 @@ jobs:
       - name: Poređenje, PDF liste i sajt
         run: |
           set +e
-          export QR_LIB="$HOME/cardealer-runner/qr/node_modules/qrcode-terminal/vendor/QRCode"
-          python tools/update.py /tmp/rad
+          export QR_LIB="$R/qr/node_modules/qrcode-terminal/vendor/QRCode"
+          python tools/update.py "$RAD"
           code=$?
-          cat /tmp/rad/report.md >> "$GITHUB_STEP_SUMMARY"
+          cat "$RAD/report.md" >> "$GITHUB_STEP_SUMMARY"
           exit $code
 
       - name: Objavljivanje
@@ -67,7 +79,8 @@ jobs:
           git config user.name "CAR DEALER liste"
           git config user.email "actions@users.noreply.github.com"
           git add -A index.html data pdf logo.png manifest.webmanifest sw.js icon-192.png icon-512.png favicon.ico
-          git commit -m "Provera oglasa $(TZ=Europe/Belgrade date +%d.%m.%Y.\ %H:%M) (GitHub)" || exit 0
+          KAD=$(python -c "from datetime import datetime;from zoneinfo import ZoneInfo;print(datetime.now(ZoneInfo('Europe/Belgrade')).strftime('%d.%m.%Y. %H:%M'))")
+          git commit -m "Provera oglasa $KAD ($RUNNER_NAME)" || exit 0
           for i in 1 2 3; do
             git pull --rebase -X theirs origin main && git push origin HEAD:main && break
             sleep 10
@@ -78,5 +91,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rad
-          path: /tmp/rad
+          path: ${{ runner.temp }}/rad
           retention-days: 7
