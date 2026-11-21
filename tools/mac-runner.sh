@@ -36,9 +36,10 @@ fi
 say "4/5  Povezivanje sa GitHub-om"
 echo "Na GitHubu (nalog cardealer-bg) otvorite:"
 echo "  $REPO/settings/actions/runners/new?arch=arm64&os=osx"
-echo "U delu 'Configure' kopirajte dugačak kod iza  --token  (počinje sa A...)."
+echo "U delu 'Configure' kopirajte SAMO kod iza  --token  (niz velikih slova i brojeva)."
 printf "Nalepite kod ovde i pritisnite Enter: "
 read -r TOKEN < /dev/tty
+TOKEN=$(printf "%s" "$TOKEN" | sed -E 's/.*--token[[:space:]]+//; s/[[:space:]].*//')
 [ -n "$TOKEN" ] || { echo "Kod nije unet."; exit 1; }
 
 cd "$DIR"
