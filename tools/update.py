@@ -6,7 +6,7 @@ import json, os, re, subprocess, sys, unicodedata, shutil, datetime
 
 T = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, T)
-from build_car import build  # noqa: E402
+from build_car import build, clean  # noqa: E402
 
 def slug(s):
     return re.sub(r"[^A-Za-z0-9]+", "_", unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()).strip("_")
@@ -33,6 +33,7 @@ def main():
     full_list = lst.get("total") is not None and len(active) >= lst["total"]
     rep = {"Novi": [], "Promena cene": [], "Izmene podataka": [], "Uklonjeni": [], "Vraćeni": [], "Nije pročitano": []}
     new_pdfs = []
+    dirty = False  # data changed silently (page baseline saved, junk cleaned)
 
     def log(c, typ, details):
         rec = {"at": now, "type": typ, "details": details}
@@ -45,8 +46,10 @@ def main():
             rep["Nije pročitano"].append(f'{ad.get("title") or i} (#{i})'); continue
         n = build(json.load(open(os.path.join(work, "raw", i + ".json"), encoding="utf-8")))
         o = by.get(i)
+        tidy = False  # sheet only cleaned of page junk: rebuild it, log nothing
         if o is None:
             typ_list = [("nov", [])]
+            n["src"] = {f: n[f] for f in ("equipment", "safety", "condition")}
         else:
             typ_list = []
             if o.get("price") != n["price"]:
@@ -58,13 +61,30 @@ def main():
             for k, v in n["specs"]:
                 if k in os_ and norm(os_[k]) != norm(v):
                     d.append({"field": k, "old": os_[k], "new": v})
-            # empty list on the page = probably not loaded; never count that as "everything removed"
+            # Lists: compare what the page says now with what the page said last time (o["src"]),
+            # never with the sheet itself, which may hold hand-made additions (highlights, nicer names).
+            # No o["src"] yet = first run with this reader: remember the page silently, report nothing.
+            src, page = o.get("src"), {}
             for fld, lab in (("equipment", "Oprema"), ("safety", "Sigurnost"), ("condition", "Stanje")):
-                if n[fld]: d += list_diff(lab, o.get(fld), n[fld])
+                mine = clean(o.get(fld))
+                page[fld] = n[fld] if n[fld] else (src or {}).get(fld, [])  # empty = probably not loaded
+                if src is not None and n[fld]:
+                    ld = list_diff(lab, src.get(fld), n[fld]); d += ld
+                    gone = {norm(x["old"]) for x in ld if x["old"]}
+                    mine = [x for x in mine if norm(x) not in gone]
+                    mine += [x["new"][2:] for x in ld if x["new"] and norm(x["new"][2:]) not in {norm(y) for y in mine}]
+                n[fld] = mine
+            n["src"] = page
+            n["highlights"] = o.get("highlights", n["highlights"])
+            n["note"] = o.get("note") or n["note"]
             if d: typ_list.append(("izmena", d))
             if o.get("sold"):
                 typ_list.insert(0, ("vracen", []))
-        if not typ_list: continue
+            tidy = not typ_list and any(n[f] != o.get(f) for f in ("equipment", "safety", "condition"))
+            if not typ_list and not tidy:
+                if o.get("src") != n["src"]: o["src"] = n["src"]; dirty = True
+                continue
+            dirty = dirty or tidy
         pdf = f'pdf/{slug(n["make"])}_{slug(n["model"])}_{i}.pdf'
         if o is not None and o.get("pdf_file"): pdf = o["pdf_file"]
         js = os.path.join(work, "new_" + i + ".json"); json.dump(n, open(js, "w"), ensure_ascii=False)
@@ -109,7 +129,7 @@ def main():
             "oglasa. Ništa nije objavljeno.\n\n" + "\n".join("- " + x for x in rep["Izmene podataka"][:15]) + "\n")
         print(open(os.path.join(work, "report.md")).read()); sys.exit(3)
     changed = any(rep[k] for k in ("Novi", "Promena cene", "Izmene podataka", "Uklonjeni", "Vraćeni"))
-    if changed:
+    if changed or dirty:
         json.dump(cars, open("data/cars.json", "w", encoding="utf-8"), ensure_ascii=False)
         json.dump(changes[-500:], open("data/changes.json", "w", encoding="utf-8"), ensure_ascii=False)
         act = sorted([c for c in cars if not c.get("sold")], key=lambda c: (c["make"], c["model"]))
