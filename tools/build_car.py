@@ -19,6 +19,14 @@ def fix_words(s):
     s = s.strip()
     return s[:1].upper() + s[1:] if s else s
 
+# page text that is not equipment (dealer box, model info box, slogans, ratings)
+JUNK = re.compile(r"kontakt podaci|car dealer|kompletna ponuda|^beograd$|čelebonovi|celebonovi|klik da vidi|^trgovac$|"
+                  r"više informacija|vise informacija|sadržaj sajta|sadrzaj sajta|iskustva vozača|iskustva vozaca|"
+                  r"pogledaj detaljnije|dont dream|don't dream|^\d+([.,]\d+)?$|\(\d{4}\s*-\s*(\d{4}|trenutno)\)", re.I)
+
+def clean(xs):
+    return [x for x in xs or [] if x and not JUNK.search(x)]
+
 def dedupe(xs):
     out, seen = [], set()
     for x in xs:
@@ -53,9 +61,9 @@ def build(r):
              ("Vrata / sedišta", doors), ("Enterijer", interior), ("Registrovan do", g("Registrovan do").rstrip(".")), ("Poreklo", g("Poreklo vozila"))]
     specs = [[k, v or "—"] for k, v in specs]
     hl = dedupe([fix_words(h) for h in r.get("highlights") or []])
-    eq = dedupe([EQ_FIX.get(e, fix_words(e)) for e in r.get("equipment") or []])
+    eq = dedupe([EQ_FIX.get(e, fix_words(e)) for e in clean(r.get("equipment"))])
     if not eq: eq = hl[:]
-    cond = [c for c in (r.get("condition") or []) if c and c != "Polovno vozilo"]
+    cond = [c for c in clean(r.get("condition")) if c != "Polovno vozilo"]
     if g("Oštećenje") == "Nije oštećen" and "Nije oštećen" not in cond: cond.append("Nije oštećen")
     trade = g("Zamena")
     trade = {"DA (Svejedno)": "DA", "DA (Zamena za jeftinije)": "DA, za jeftinije"}.get(trade, trade)
@@ -64,7 +72,7 @@ def build(r):
     return {"id": str(r["id"]), "url": r.get("url", ""), "make": make, "model": model, "variant": variant,
             "price": r.get("price", ""), "price_note": pn, "published": (r.get("published") or "").rstrip("."),
             "fixed_price": g("Fiksna cena"), "trade_in": trade, "specs": specs, "highlights": hl[:6],
-            "safety": dedupe(r.get("safety") or []), "equipment": eq, "condition": cond, "note": (r.get("note") or "").strip()}
+            "safety": dedupe(clean(r.get("safety"))), "equipment": eq, "condition": cond, "note": (r.get("note") or "").strip()}
 
 if __name__ == "__main__":
     src, out = sys.argv[1], sys.argv[2]
