@@ -68,7 +68,7 @@ def main():
         pdf = f'pdf/{slug(n["make"])}_{slug(n["model"])}_{i}.pdf'
         if o is not None and o.get("pdf_file"): pdf = o["pdf_file"]
         js = os.path.join(work, "new_" + i + ".json"); json.dump(n, open(js, "w"), ensure_ascii=False)
-        out = subprocess.run(["python3", os.path.join(T, "make_sheet.py"), js, pdf], capture_output=True, text=True)
+        out = subprocess.run([sys.executable, os.path.join(T, "make_sheet.py"), js, pdf], capture_output=True, text=True)
         print(out.stdout.strip(), out.stderr.strip()[-500:])
         if "'fits': True" not in out.stdout:
             rep["Nije pročitano"].append(f'{n["make"]} {n["model"]} (#{i}) – lista ne staje na A4'); continue
@@ -114,12 +114,12 @@ def main():
         json.dump(changes[-500:], open("data/changes.json", "w", encoding="utf-8"), ensure_ascii=False)
         act = sorted([c for c in cars if not c.get("sold")], key=lambda c: (c["make"], c["model"]))
         files = [c["pdf_file"] for c in act if os.path.exists(c["pdf_file"])]
-        subprocess.run(["python3", os.path.join(T, "merge_all.py"), "pdf/CAR_DEALER_sve_liste_A4.pdf"] + files, check=True)
+        subprocess.run([sys.executable, os.path.join(T, "merge_all.py"), "pdf/CAR_DEALER_sve_liste_A4.pdf"] + files, check=True)
         json.dump({"all_pdf": "pdf/CAR_DEALER_sve_liste_A4.pdf", "count": len(files), "updated_at": now},
                   open("data/meta.json", "w"))
     # site (always, refreshes "poslednja provera")
     tmp = os.path.join(work, "sajt")
-    subprocess.run(["python3", os.path.join(T, "make_site.py"), "data/cars.json", "data/changes.json", "pdf", tmp], check=True)
+    subprocess.run([sys.executable, os.path.join(T, "make_site.py"), "data/cars.json", "data/changes.json", "pdf", tmp], check=True)
     for f in os.listdir(tmp):
         if f != "pdf": shutil.copy(os.path.join(tmp, f), f)
 
