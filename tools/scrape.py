@@ -81,7 +81,10 @@ def make_highlights(desc_lines):
             out.append(m.group(1).strip(" .;,"))
     return out
 
-def parse_ad(title, text, ad_id, url):
+PRICE_SEL = ('[class*="PriceSection"] [class*="FormattedPrice"]', '[class*="PriceWrapper"] [class*="FormattedPrice"]',
+             '[class*="MobilePrice"] [class*="FormattedPrice"]')
+
+def parse_ad(title, text, ad_id, url, dom_price=""):
     ls = lines_of(text)
     opste, i1 = section(ls, "Opšte informacije", info=True)
     dod, i2 = section(ls, "Dodatne informacije", info=True)
@@ -93,8 +96,10 @@ def parse_ad(title, text, ad_id, url):
     condition, _ = section(ls, "Stanje", after)
     desc, _ = section(ls, "Opis", after)
     price, note_p = "", ""
+    dp = re.match(r"^(\d{1,3}(?:\.\d{3})+|\d{3,})\s*€", (dom_price or "").strip())
     for k, l in enumerate(ls):
         m = re.match(r"^(\d{1,3}(?:\.\d{3})+|\d{3,})\s*€\s*(.*)$", l)
+        if m and dp and m.group(1) != dp.group(1): continue  # another ad's price (banner / similar ads)
         if m:
             price = m.group(1) + " €"; note_p = m.group(2).strip()
             if not note_p and k + 1 < len(ls) and ls[k + 1].startswith("+"): note_p = ls[k + 1]
@@ -150,7 +155,12 @@ def main():
                     body = pg.inner_text("body")
                     os.makedirs(os.path.join(out, "text"), exist_ok=True)
                     open(os.path.join(out, "text", ad["id"] + ".txt"), "w").write(body)
-                    raw = parse_ad(h1.inner_text() if h1 else ad["title"], body, ad["id"], ad["url"])
+                    dom_price = ""
+                    for sel in PRICE_SEL:
+                        e = pg.query_selector(sel)
+                        dom_price = (e.inner_text() or "").strip() if e else ""
+                        if dom_price: break
+                    raw = parse_ad(h1.inner_text() if h1 else ad["title"], body, ad["id"], ad["url"], dom_price)
                     if ok(raw): break
                 except Exception as e:
                     print("ad error", ad["id"], e)
