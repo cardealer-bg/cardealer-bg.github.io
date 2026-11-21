@@ -19,7 +19,8 @@ LABELS = ["Stanje", "Marka", "Model", "Godište", "Kilometraža", "Karoserija", 
 LABELS.sort(key=len, reverse=True)
 SECTION_END = {"Opšte informacije", "Dodatne informacije", "Sigurnost", "Oprema", "Stanje", "Opis", "Kontakt",
                "Prijavi oglas", "Slični oglasi", "Ostali oglasi prodavca", "Poruka prodavcu", "Lokacija", "Galerija",
-               "Pošalji poruku", "Podeli oglas", "Prijavite oglas", "Pogledajte i", "Izdvojeni oglasi"}
+               "Pošalji poruku", "Podeli oglas", "Prijavite oglas", "Pogledajte i", "Izdvojeni oglasi",
+               "Kontakt podaci", "Više informacija o ovom modelu"}
 DEALER_TEXT = re.compile(r"kredit|lizing|leasing|ovlašćen|ovlascen|legalnost|stručn|strucn|car dealer|telefon|"
                          r"\+381|\b06\d|pozovite|kontakt|najav|zakon|potrošač|potrosac|tehnički pregled|registracij|"
                          r"probne tablice|otkup|zamena|kupovin|pregledan|garantujemo|garantuje|provera|proverite|"
